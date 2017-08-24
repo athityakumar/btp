@@ -2,11 +2,9 @@ require: rubocop-rspec
 
 AllCops:
   Include:
-    - 'lib/**/*'
+    - 'lib/btp/*'
   Exclude:
-    - 'vendor/**/*'
-    - 'benchmarks/*'
-    - 'profile/*'
+    - 'lib/btp/archive/*'
   DisplayCopNames: true
   TargetRubyVersion: 2.1
 
