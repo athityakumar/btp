@@ -43,9 +43,10 @@
 - **Who**: Amrith Krishna sir, Gaurav Sahu and myself
 - **What**: 
   - Perform random walk on the generated source adjacency matrix (DataFrame)
-  - Create DataFrame df1 with vectors `char`, `left_position`, `right_position` and `count`
-  - Create DataFrame df2 with vectors `char_1`, `left_1`, `right_1`, `char_2`, `left_2`, `right_2` and `count`
-  - Create DataFrame df3 with vectors `source`, `target` and `removed_substrings`
-  - Create DataFrame df4 with vectors `source`, `target` and `sequence_of_operations`
-  - Create DataFrame df5 with vectors `operation`, `char`, `left_position`, `right_position` and `count`
+  - Create (unigram) DataFrame df1 with vectors `char`, `left_position`, `right_position` and `count`
+  - Create (bigram) DataFrame df2 with vectors `char_1`, `left_1`, `right_1`, `char_2`, `left_2`, `right_2` and `count`
+  - Create (substring_removal) DataFrame df3 with vectors `source`, `target` and `removed_substrings`
+  - Create (operations_sequence) DataFrame df4 with vectors `source`, `target` and `sequence_of_operations`
+  - Create (operations) DataFrame df5 with vectors `operation`, `char`, `left_position`, `right_position` and `count`
+
   Finally, the idea is to automate the task and perform it for all languages and convert all DataFrames to CSV

@@ -4,12 +4,12 @@ lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'btp/version'
 
-BTP::DESCRIPTION = "This is Athitya Kumar's BTech project, done under "\
-                   "Research Scholar Amrith Krishna and Prof. Pawan Goyal "\
-                   "from the Department of Computer Science, IIT Kharagpur."
+BTP::DESCRIPTION = 'This is the BTech project of Athitya Kumar, done under '\
+                   'Research Scholar Amrith Krishna and Prof. Pawan Goyal '\
+                   'from the Department of Computer Science, IIT Kharagpur.'
                    .freeze
 
-Gem::Specification.new do |spec|
+Gem::Specification.new do |spec| # rubocop:disable Metrics/BlockLength
   spec.name          = 'btp'
   spec.version       = BTP::VERSION
   spec.authors       = ['Athitya Kumar']
@@ -26,6 +26,9 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'daru', '~> 0.1.5'
 
   spec.add_development_dependency 'bundler', '~> 1.15'
+  spec.add_development_dependency 'czmq'
+  spec.add_development_dependency 'ffi-rzmq'
+  spec.add_development_dependency 'iruby'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'redcarpet'
   spec.add_development_dependency 'rspec', '~> 3.0'
