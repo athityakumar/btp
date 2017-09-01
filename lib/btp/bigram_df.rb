@@ -6,20 +6,9 @@ module BTP
     end
 
     def parse(summa_data=nil)
-      @words = if summa_data
-                 summa_data
-               else
-                 File
-                   .read(@path)
-                   .split("\n")
-                   .map { |line| line.split("\t") }
-                   .keep_if { |line| line[1].include?('pos=N') }
-                   .map(&:first)
-               end
-
+      @words = Helper.read_input(summa_data, @path)
       @dataframe = Daru::DataFrame.new({}, order: %i[character_1 left_1 right_1 character_2 left_2 right_2 count])
       @words.each { |word| bigram_dataframe(word) }
-
       @dataframe
     end
 

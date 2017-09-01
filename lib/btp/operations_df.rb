@@ -6,18 +6,9 @@ module BTP
     end
 
     def parse(summa_data=nil)
-      @word_pairs = if summa_data
-                      summa_data
-                    else
-                      File
-                        .read(@path)
-                        .split("\n")
-                        .map { |line| line.split("\t") }
-                        .keep_if { |line| line[1].include?('pos=N') }
-                        .map { |line| [line.first, line.last] }
-                    end
+      @word_pairs = Helper.read_input(summa_data, @path, dest: true)
+      @dataframe  = Daru::DataFrame.new({}, order: %i[operation character count])
 
-      @dataframe = Daru::DataFrame.new({}, order: %i[operation character count])
       @word_pairs.each do |source, dest|
         delete = deletion_sequence(source, dest)
         insert = insertion_sequence(source, dest)

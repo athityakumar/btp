@@ -7,31 +7,21 @@ module BTP
     end
 
     def parse(summa_data=nil)
-      @words = if summa_data
-                 summa_data
-               else
-                 File
-                   .read(@path)
-                   .split("\n")
-                   .map { |line| line.split("\t") }
-                   .keep_if { |line| line[1].include?('pos=N') }
-                   .map(&:first)
-               end
-
+      @words = Helper.read_input(summa_data, @path)
       compute_counters(@words)
-
       @alphabets = @words.map { |word| word.split('') }.flatten.uniq.sort
 
       puts "Unique alphabets: #{@alphabets}"
       puts "Unique alphabets count: #{@alphabets.count}"
-
+      puts "Words count: #{@words.count}"
+    
       @fields = @alphabets.map do |alphabet|
         [
           alphabet,
-          (0..@left_most).map { |i| "#{alphabet}_#{i}" },
-          (@right_most..-1).map { |j| "#{alphabet}_#{j}" },
-          (0..@left_most).map do |i|
-            (@right_most..-1).map do |j|
+          (0..@left_most-1).map { |i| "#{alphabet}_#{i}" },
+          (@right_most+1..-1).map { |j| "#{alphabet}_#{j}" },
+          (0..@left_most-1).map do |i|
+            (@right_most+1..-1).map do |j|
               "#{alphabet}_#{i}_#{j}"
             end
           end
@@ -39,8 +29,8 @@ module BTP
       end.flatten
 
       puts "DataFrame size: #{@fields.count} = "\
-           "#{@alphabets.count}*#{@left_most+1}*#{@left_most+1} + "\
-           "#{@alphabets.count}*#{@left_most+1}*2 + #{@alphabets.count}"
+           "#{@alphabets.count}*#{@left_most}*#{@left_most} + "\
+           "#{@alphabets.count}*#{@left_most}*2 + #{@alphabets.count}"
 
       @dataframe = Daru::DataFrame.new({}, order: @fields, index: @fields)
       @words.each { |word| adjacency_matrix(word) }
@@ -64,14 +54,14 @@ module BTP
       @left_most  = (length_frequency.find { |_k, v| v > 0.7 }.first - 1).freeze
       @right_most = (-1 * @left_most - 1).freeze
 
-      puts "Left most: #{@left_most+1}"
+      puts "Left most: #{@left_most}"
     end
 
     def adjacency_matrix(word)
       i = 0
       word_length = word.length
 
-      while i < word_length - 1
+      while i < word_length
         j = i+1
         while j < word_length
           update_adjacency_matrix(i, i - word_length, word[i], j, j - word_length, word[j])
@@ -103,6 +93,7 @@ module BTP
       update_at("#{char1}_#{left1}", char2) if left1 < @left_most
       update_at(char1, char2)
     end
+
 
     def update_at(key1, key2)
       if @dataframe[key1][key2]
