@@ -5,6 +5,7 @@
 - [Aug 10th, 2017 (Thursday)](#aug-10th-2017-thursday)
 - [Aug 17th, 2017 (Thursday)](#aug-17th-2017-thursday)
 - [Aug 24th, 2017 (Thursday)](#aug-24th-2017-thursday)
+- [Sep 3rd, 2017 (Sunday)](#sep-3rd-2017-sunday)
 
 ### Jul 25th, 2017 (Tuesday)
 
@@ -52,3 +53,13 @@
   - [x] Create (operations) DataFrame df5 with vectors `operation`, `char`, `left_position`, `right_position` and `count`
 
   Finally, the idea is to automate the task and perform it for all languages and convert all DataFrames to CSV
+
+### Sep 3rd, 2017 (Sunday)
+
+[(Back to top)](#minutes-of-meetings)
+
+- **Who**: Amrith Krishna sir, Gaurav Sahu and myself
+- **What**: 
+  - [ ] Design traceable structures
+  - [ ] Fix adjacency matrix and faster bigram with rgl gem
+  - [ ] Apply random walk, random search and logistic regression
