@@ -51,7 +51,7 @@ module BTP
                          .map { |k, v| [k, v/total] }
                          .to_h
 
-      @left_most  = (length_frequency.find { |_k, v| v > 0.7 }.first - 1).freeze
+      @left_most  = (length_frequency.find { |_k, v| v > 0.7 }.first).freeze
       @right_most = (-1 * @left_most - 1).freeze
 
       puts "Left most: #{@left_most}"
