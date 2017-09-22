@@ -11,7 +11,18 @@ module BTP
       @words.each { |word| bigram_dataframe(word) }
       @dataframe
     end
-
+# df = adjacency_matrix_df
+# new_order = df.vectors.to_a.find_all { |x| x.count('_') == 2 }
+# new_idx = df.index.to_a.find_all { |x| x.count('_') == 2 }
+# cropped_df = df.row[*new_order][*new_idx]
+# bigram = Daru::DataFrame.new({}, order: %w[char1 lpos1 rpos1 char2 lpos2 rpos2 count])
+# cropped_df.each_row_with_index do |row, data1|
+# char1, lpos1, rpos1 = data1.split('_')
+# row.each_with_index do |count, data2|
+# char2, lpos2, rpos2 = data2.split('_')
+# bigram.add_row [char1, lpos1, rpos1, char2, lpos2, rpos2, count]
+# end
+# end
     private
 
     def bigram_dataframe(word)
