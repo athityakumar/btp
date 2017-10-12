@@ -87,3 +87,13 @@ module Daru
     end
   end
 end
+
+class Hash
+  def update_at(key, count=1)
+    if self.keys.include?(key)
+      self[key] += count
+    else
+      self[key] = count
+    end
+  end
+end

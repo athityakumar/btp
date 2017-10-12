@@ -6,32 +6,29 @@ module BTP
 
     def compute_normalized_matrices
       compute_adjacency_matrices unless @adj_mat
-      @norm_adj_mat = @adj_mat.map do |key, adjacency|
-        puts 'Normalizing adjacency matrix'
-        alphabets = adjacency.vectors.to_a
-        placeholder = 1.0 / (adjacency.ncols ** 2)
-        data = adjacency.map_rows do |row|
-          zeroes = row.map { |element| element == 0 }
-          n_zeroes = zeroes.count(true)
-          zero_prob = n_zeroes * placeholder
-          non_zero_sum = row.sum.to_f
-          row.map do |element|
-            if element.zero?
-              placeholder
-            else
-              element*(1-zero_prob)/non_zero_sum
-            end
+      adjacency = @adj_mat
+      
+      puts 'Normalizing adjacency matrix'
+      alphabets = adjacency.vectors.to_a
+      placeholder = 1.0 / (adjacency.ncols ** 2)
+      data = adjacency.map_rows do |row|
+        zeroes = row.map { |element| element == 0 }
+        n_zeroes = zeroes.count(true)
+        zero_prob = n_zeroes * placeholder
+        non_zero_sum = row.sum.to_f
+        row.map do |element|
+          if element.zero?
+            placeholder
+          else
+            element*(1-zero_prob)/non_zero_sum
           end
         end
-        [
-          key,
-          Daru::DataFrame.rows(
-            data,
-            order: alphabets,
-            index: alphabets
-          )
-        ]
-      end.to_h
+      end
+      @norm_adj_mat = Daru::DataFrame.rows(
+        data,
+        order: alphabets,
+        index: alphabets
+      )
     end
 
     def perform_random_walk(iterations=5)
