@@ -1,10 +1,9 @@
 module BTP
   class DataFrames
 
-    attr_reader :operations_mat
-    attr_reader :operations_hash
+    # attr_reader :operations_hash
 
-    def compute_operations
+    def compute_operations(source, dest)
       # @operations_mat = Daru::DataFrame.new({}, order: %i[operation char lpos rpos count])
       # @operations_mat = {
       #   chars: Daru::DataFrame.new({}, order: @alphabets, index: ['']+@alphabets),
@@ -12,8 +11,20 @@ module BTP
       #   chars_rpos: Daru::DataFrame.new({}, order: @rpos_fields, index: ['']+@alphabets),
       #   chars_lpos_rpos: Daru::DataFrame.new({}, order: @lpos_rpos_fields, index: ['']+@alphabets)
       # }
-      @operations_hash = {}
-      @word_pairs.each do |source, dest|
+
+      # @operations_mat = Daru::DataFrame.new({}, order: @alphabets)
+
+      # @word_pairs.each do |source, dest, _tags|
+        source_len   = source.length
+        # source_nodes = source.split('').map.with_index do |char, lpos|
+        #   rpos = lpos - source_len
+        #   [
+        #     char,
+        #     "#{char}_#{lpos}",
+        #     "#{char}_#{rpos}",
+        #     "#{char}_#{lpos}_#{rpos}"
+        #   ]
+        # end.flatten
         # constant_sequence(source, dest).each do |constant|
         #   char, lpos, rpos = constant.split('_')
           # @operations_mat[:chars].update_at(char, char)
@@ -22,29 +33,41 @@ module BTP
           # @operations_mat[:chars_lpos_rpos].update_at("#{char}_#{lpos}_#{rpos}", char)
         # end
 
-        insertion_sequence(source, dest).each do |insert|
+        insert_operations = insertion_sequence(source, dest).map do |insert|
           char, lpos, rpos = insert.split('_')
-          @operations_hash.update_at("insert_#{insert}")
+          "insert_#{insert}"
+          # source_nodes.each do |node|
+          #   @operations_mat.update_at(node, "insert_#{insert}")
+          # end
           # @operations_mat[:chars].update_at(alpha, char)
           # @operations_mat[:chars_lpos].update_at("#{alpha}_#{lpos}", char)
           # @operations_mat[:chars_rpos].update_at("#{alpha}_#{rpos}", char)
           # @operations_mat[:chars_lpos_rpos].update_at("#{alpha}_#{lpos}_#{rpos}", char)
         end
 
-        deletion_sequence(source, dest).each do |delete|
+        delete_operations = deletion_sequence(source, dest).each do |delete|
           char, lpos, rpos = delete.split('_')
-          @operations_hash.update_at("delete_#{delete}")
+          "delete_#{delete}"
+          # source_nodes.each do |node|
+          #   @operations_mat.update_at(node, "delete_#{delete}")
+          # end
           # @operations_mat[:chars].update_at(char, '')
           # @operations_mat[:chars_lpos].update_at("#{char}_#{lpos}", '')
           # @operations_mat[:chars_rpos].update_at("#{char}_#{rpos}", '')
           # @operations_mat[:chars_lpos_rpos].update_at("#{char}_#{lpos}_#{rpos}", '')
         end
 
-        @operations_mat = Daru::DataFrame.rows(
-          @operations_hash.map { |key, count| [key.split('_'), count].flatten },
-          order: %i[operation char lpos rpos count]
-        )
-      end
+        word_operations = insert_operations + delete_operations
+        word_operations.each do |operation|
+          @operations.push(operation) unless @operations.include?(operation)
+        end
+        word_operations
+
+        # @operations_mat = Daru::DataFrame.rows(
+        #   @operations_hash.map { |key, count| [key.split('_'), count].flatten },
+        #   order: %i[operation char lpos rpos count]
+        # )
+      # end
 
       # @operations_mat = @operations_mat.map do |key, dataframe|
       #   [

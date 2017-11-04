@@ -3,6 +3,7 @@ require 'daru/io'
 
 require 'btp/version'
 require 'btp/helper'
+require 'btp/monkeys'
 
 require 'btp/adjacency_matrix'
 require 'btp/unigram_df'
@@ -20,3 +21,7 @@ require 'btp/svm'
 require 'libsvm'
 include Libsvm
 require 'set'
+
+require 'btp/fasttext'
+require 'decisiontree'
+require 'btp/decision_tree'

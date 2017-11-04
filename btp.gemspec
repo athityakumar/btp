@@ -25,6 +25,7 @@ Gem::Specification.new do |spec| # rubocop:disable Metrics/BlockLength
 
   spec.add_runtime_dependency 'daru', '~> 0.1.5'
   spec.add_runtime_dependency 'daru-io'
+  spec.add_runtime_dependency 'decisiontree'
   spec.add_runtime_dependency 'rb-libsvm'
   spec.add_runtime_dependency 'ruby_linear_regression'
 
