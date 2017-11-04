@@ -6,6 +6,12 @@
 - [Aug 17th, 2017 (Thursday)](#aug-17th-2017-thursday)
 - [Aug 24th, 2017 (Thursday)](#aug-24th-2017-thursday)
 - [Sep 3rd, 2017 (Sunday)](#sep-3rd-2017-sunday)
+- [Oct 10th, 2017 (Tuesday)](#oct-10th-2017-tuesday)
+- [Oct 12th, 2017 (Thursday)](#oct-12th-2017-thursday)
+- [Oct 19th, 2017 (Thursday)](#oct-19th-2017-thursday)
+- [Oct 24th, 2017 (Tuesday)](#oct-24th-2017-tuesday)
+- [Nov 3rd, 2017 (Friday)](#nov-3rd-2017-friday)
+- [Nov 4th, 2017 (Saturday)](#nov-4th-2017-saturday)
 
 ### Jul 25th, 2017 (Tuesday)
 
@@ -63,3 +69,59 @@
   - [ ] Design traceable structures
   - [ ] Fix adjacency matrix and faster bigram with rgl gem
   - [ ] Apply random walk, random search and logistic regression
+
+
+### Oct 10th, 2017 (Tuesday)
+
+[(Back to top)](#minutes-of-meetings)
+
+- **Who**: Prof Pawan Goyal, Gaurav Sahu and myself
+- **What**: 
+  - [ ] Explaining progress till mid-term evaluations
+  - [ ] Discussion about choosing better labels and features
+
+### Oct 12th 2017 (Thursday)
+
+[(Back to top)](#minutes-of-meetings)
+
+- **Who**: Amrith Krishna sir, Gaurav Sahu and myself
+- **What**: 
+  - [ ] Explaining progress till mid-term evaluations
+  - [ ] Discussion about choosing better labels and features
+  - [ ] I'm given the task of fasttext
+
+### Oct 19th 2017 (Thursday)
+
+[(Back to top)](#minutes-of-meetings)
+
+- **Who**: Amrith Krishna sir, Gaurav Sahu and myself
+- **What**: 
+  - [ ] According to the set metric, adj_mat seems better than fasttext
+  - [ ] Given the task of generating the graph of source words
+
+### Oct 24th, 2017 (Tuesday)
+
+[(Back to top)](#minutes-of-meetings)
+
+- **Who**: Amrith Krishna sir and myself
+- **What**: 
+  - [ ] Modified LDist to be used to get 10 closest words to a given word
+  - [ ] By comparing closest words to the word, chunks of characters can be formed as nodes
+
+### Nov 3rd, 2017 (Friday)
+
+[(Back to top)](#minutes-of-meetings)
+
+- **Who**: Amrith Krishna sir and myself
+- **What**: 
+  - [ ] Think about adding visualization with JS libraries
+  - [ ] Use Giphe to get network data like Diameter, Average Degree, etc.
+
+### Nov 4th, 2017 (Saturday)
+
+[(Back to top)](#minutes-of-meetings)
+
+- **Who**: Amrith Krishna sir, Gaurav Sahu and myself
+- **What**: 
+  - [ ] Add visualization with JS libraries, by next Thursday
+  - [ ] Send Giphe network data today and discuss tomorrow

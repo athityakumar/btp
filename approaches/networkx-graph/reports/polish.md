@@ -12,7 +12,7 @@
   - Number of edges : 31617             
   - Frequency of string-length of nodes :
 
-  ```json
+  ```python
     {
       1: 57, 2: 387, 3: 1413, 4: 1551, 5: 1036, 6: 618, 7: 367, 8: 190,
       9: 121, 10: 77, 11: 42, 12: 22, 13: 13, 14: 11, 15: 2, 16: 1,
@@ -27,7 +27,7 @@
   - Number of edges : 25822
   - Frequency of string-length of nodes :
 
-  ```json
+  ```python
   {
     1: 57, 2: 387, 3: 1413, 4: 1550, 5: 1035, 6: 618, 7: 367, 8: 190,
     9: 121, 10: 77, 11: 42, 12: 22, 13: 13, 14: 11, 15: 2, 16: 1,
@@ -42,9 +42,7 @@
   - Average path length : 2.806
   - Average clustering coeff : 0.581
 
-### Images of plots
-
-Obtained by Giphe
+### Images of plots obtained by Giphe
 
 - Degree Distibution :
 
@@ -73,7 +71,10 @@ Obtained by Giphe
 - Eigenvector Centrality Distribution :
 
 ![image1](https://user-images.githubusercontent.com/17109060/32405600-7a574a1e-c18e-11e7-9289-45108a85a2f2.png)
-ercontent.com/17109060/32405568-043b9ce0-c18e-11e7-8a37-3a38124551da.png)
+
+- Eccentricity Distribution :
+
+![image1](https://user-images.githubusercontent.com/17109060/32405568-043b9ce0-c18e-11e7-8a37-3a38124551da.png)
 
 - Modularity Size Distribution :
 
