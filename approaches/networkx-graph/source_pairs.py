@@ -80,6 +80,47 @@ def export_source_graph_to_csv(source_G, csv_filename):
 
   file.close()
 
+def export_source_graph_to_d3js_json(G, json_filename):
+
+  file = open(json_filename,'w')
+  file.write("{\"nodes\":[")
+  
+  x = 0
+  y = 0
+  nodes_string = list()
+
+  square_size = int(len(G.nodes)**(1/2.0))
+  node_gap = 200
+  nodes = [node for node in G]
+
+  for i, node in enumerate(nodes):
+    print(i, node, x, y)
+    nodes_string.append("{\"title\":\""+node+"\",\"id\":"+str(i)+",\"x\":"+str(x)+",\"y\":"+str(y)+"}")
+
+    if (i+1) % square_size == 0:
+      x = 0
+      y += node_gap
+    else:
+      x += node_gap
+
+  print(len(G.nodes), square_size)
+  file.write(",".join(nodes_string))
+
+  file.write("],\"edges\":[")
+
+  edges_string = list()
+
+  for node in G:
+    node_index = str(nodes.index(node))
+    for neighbor in G[node]:
+      weight = str(G[node][neighbor]['weight'])
+      neighbor_index = str(nodes.index(neighbor))
+      edges_string.append("{\"source\":"+node_index+",\"target\":"+neighbor_index+",\"weight\":"+weight+"}")
+
+  file.write(",".join(edges_string))
+  file.write("]}")
+  file.close()
+
 def import_source_graph_from_csv(csv_filename):
   file = open(csv_filename, 'r')
   source_G = nx.DiGraph()
@@ -91,6 +132,7 @@ def import_source_graph_from_csv(csv_filename):
 
   return(source_G)
 
+
 if __name__ == '__main__':
   print('Started reading words')
 
@@ -98,7 +140,7 @@ if __name__ == '__main__':
   language     = 'polish'
   qualities    = ['low', 'medium', 'high']
   quality      = qualities[2]
-  filename     = "csv/" + language + "_" + quality
+  filename     = "dumps/" + language + "_" + quality
   modes        = ['import', 'export']
   mode         = modes[0]
 
@@ -169,3 +211,5 @@ if __name__ == '__main__':
     source_G.remove_node('start')
     source_G.remove_node('stop')
     pretty_print_graph(source_G)
+
+    export_source_graph_to_d3js_json(source_G, filename+'-d3js.json')
