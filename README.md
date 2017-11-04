@@ -1,10 +1,8 @@
 # BTP
 
-[![Build Status](https://travis-ci.org/athityakumar/btp.svg?branch=master)](https://travis-ci.org/athityakumar/btp)
-[![nbviewer](https://img.shields.io/badge/render-nbviewer-orange.svg)](http://nbviewer.jupyter.org/github/athityakumar/btp/tree/master/iruby/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-A Ruby gem that aims to achieve Program Synthesis. This is my BTech project at IIT Kharagpur under Prof. Pawan Goyal of Computer Science Department, with guidance from Amrith Krishna and working along with Gaurav Sahu. This project uses [daru](https://github.com/SciRuby/daru) gem for analyzing the language data using DataFrames. Have a look at the [Jupyter notebook](http://nbviewer.jupyter.org/github/athityakumar/btp/tree/master/iruby/) examples.
+This is my BTech project at IIT Kharagpur under Prof. Pawan Goyal of Computer Science Department, with guidance from Amrith Krishna and working along with Gaurav Sahu.
 
 For chronological minutes of the meeting information, have a look at the [MINUTES.md](MINUTES.md) file.
 
