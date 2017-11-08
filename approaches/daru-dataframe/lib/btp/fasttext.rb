@@ -7,7 +7,7 @@ module BTP
       @fast_text_vectors = { training: {}, testing: {} }
 
       File.open("#{@language}-train.txt", 'w') { |f| f.write(@words[:training].join("\n")) }
-      `../fastText/fasttext skipgram -input #{@language}-train.txt -output #{@language}-train -minCount 1`
+      `../../../fastText/fasttext skipgram -input #{@language}-train.txt -output #{@language}-train -minCount 1`
       `rm -rf #{@language}-train.txt`
 
       File.read("#{@language}-train.vec")
@@ -20,13 +20,18 @@ module BTP
       # pp @fast_text_vectors[:training]["najprzytulniejszy"]
 
       File.open("#{@language}-test.txt", 'w') { |f| f.write(@words[:testing].join("\n")) }
-      `../fastText/fasttext print-word-vectors #{@language}-train.bin < #{@language}-test.txt`
+      `../../../fastText/fasttext print-word-vectors #{@language}-train.bin < #{@language}-test.txt`
         .split("\n")
         .each do |line|
           word, *vectors = line.split(' ')
           @fast_text_vectors[:testing][word] = vectors.map(&:to_f)
         end
       `rm -rf #{@language}-test.txt`
+
+      require 'csv'
+
+      File.open("#{@language}-train.csv", 'w') { |f| f.write@fast_text_vectors[:training].to_a.map { |x| x.flatten.to_csv }.join }
+      File.open("#{@language}-test.csv", 'w') { |f| f.write@fast_text_vectors[:testing].to_a.map { |x| x.flatten.to_csv }.join }
     end
   end
 end
