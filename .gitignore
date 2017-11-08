@@ -3,10 +3,12 @@
 .yardoc/
 Gemfile.lock
 /_yardoc/
-*.DS_store
+.DS_store
 .rspec_status
 coverage/
 dump.rdb
 doc/
 docs/
 lib/output
+__pycache__/
+.ipynb_checkpoints/
