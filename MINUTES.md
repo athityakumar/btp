@@ -12,6 +12,7 @@
 - [Oct 24th, 2017 (Tuesday)](#oct-24th-2017-tuesday)
 - [Nov 3rd, 2017 (Friday)](#nov-3rd-2017-friday)
 - [Nov 4th, 2017 (Saturday)](#nov-4th-2017-saturday)
+- [Nov 9th, 2017 (Thursday)](#nov-9th-2017-thursday)
 
 ### Jul 25th, 2017 (Tuesday)
 
@@ -125,3 +126,11 @@
 - **What**: 
   - [ ] Add visualization with JS libraries, by next Thursday
   - [ ] Send Giphe network data today and discuss tomorrow
+  
+### Nov 9th, 2017 (Thursday)
+
+[(Back to top)](#minutes-of-meetings)
+
+- **Who**: Amrith Krishna sir, Gaurav Sahu and myself
+- **What**: 
+  - [ ] Preparation for BTP-1 presentation
