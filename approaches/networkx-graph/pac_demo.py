@@ -344,7 +344,7 @@ class Concept(nx.Graph):
     def query_oracle(hypothesis):
       self.nqueries = self.nqueries + 1
 
-      print("Old hypothesis:", hypothesis)
+        # print("Old hypothesis:", hypothesis)
       li_times = self.li_times(self.nqueries, epsilon, delta)
       # print(li_times)
 
@@ -352,9 +352,9 @@ class Concept(nx.Graph):
         # X = random.sample(M, int(random.random()*len(M))+1)
         X = self.generate_subset(M)
         member = is_member(hypothesis, X)
-        print("Membership?", member)
+        # print("Membership?", member)
         model  = self.is_model_of_implications(X, hypothesis)
-        print("Model?", model)
+        # print("Model?", model)
         if (member and not model) or (not member and model):
           return(X)
       return(True)
@@ -397,12 +397,12 @@ class Concept(nx.Graph):
   def horn1(self, is_member, is_equivalent):
     H = set()
     n = 0
-    print("\n --------------------------------------------------------------------")
+    # print("\n --------------------------------------------------------------------")
     C = is_equivalent(H)
     while C is not True:
       n += 1
-      print("Old hypothesis:", H)
-      print("Counter-example:", C)
+      # print("Old hypothesis:", H)
+      # print("Counter-example:", C)
       # if some A->B belonging to H does not respect C: not(A doesnt belong to C or B belongs to C)
       disrespectful_implications = self.implications_not_respecting_attributes(C, H)
       if len(disrespectful_implications) is not 0:
@@ -432,14 +432,14 @@ class Concept(nx.Graph):
           consequent_attrs = consequent_attrs.union(antecedent_attrs - C)
           H.add((tuple(sorted(antecedent_attrs)), tuple(sorted(consequent_attrs))))
 
-      print("New hypothesis:", H)
-      print("\n --------------------------------------------------------------------")
+      # print("New hypothesis:", H)
+      # print("\n --------------------------------------------------------------------")
       C = is_equivalent(H)
       # print("Counter-example:", C)
       # wait_till_user_responds = input("Press enter to go through next loop")
       # time.sleep(360)
 
-    print("Number of iterations:", n)
+    # print("Number of iterations:", n)
     return(H)
 
   def is_equivalent_probabilistic(self, H):
@@ -467,9 +467,52 @@ class Concept(nx.Graph):
     return(self.horn1(is_member, self.is_approx_equivalent(is_member, epsilon, delta)))
 
 
-def init_dataset(i):
+
+def generate_operations_for_a_wordpair(source, dest):
+  operations = list()
+
+  source_length = len(source)
+  dest_length   = len(dest)
+  max_length    = max(source_length, dest_length)
+  for i in range(0, max_length):
+    if i >= source_length:
+      operations.append("insert_"+dest[i])
+      # operations.append("insert_"+dest[i]+"_"+str(i-dest_length))
+    elif i >= dest_length:
+      operations.append("delete_"+source[i])
+      # operations.append("delete_"+source[i]+"_"+str(i-source_length))
+    elif not source[i] == dest[i]:
+      operations.append("delete_"+source[i])
+      operations.append("insert_"+dest[i])
+      # operations.append("delete_"+source[i]+"_"+str(i-source_length))
+      # operations.append("insert_"+dest[i]+"_"+str(i-dest_length))
+
+  return(operations)
+
+def init_dataset(i=None):
   concept = Concept()
-  if i == 0:
+  if i is None:
+    # wordpairs = dict((('run','running'), ('fly','flying'), ('sky','skying')))
+    wordpairs = read_wordpairs('../daru-dataframe/spec/fixtures/english-train-high')
+    for source in wordpairs:
+      target = wordpairs[source]
+      if not "*" in source and not "*" in target:
+        mutations = iterLCS({'source': source, 'target': target})
+        for addition in mutations['added']:
+          concept.add_relation("insert_"+addition, source)
+        for deletion in mutations['deleted']:
+          concept.add_relation("delete_"+deletion, source)
+        # print(mutations)
+    # words     = [word for word in wordpairs]
+    # for source in wordpairs:
+      # dest = wordpairs[source]
+      # operations = generate_operations_for_a_wordpair(source, dest)
+      # print(source, dest, operations)
+      # for operation in operations:
+      #   concept.add_relation(operation, source)
+      # print(source, dest, generate_operations_for_a_wordpair(source, dest))
+    # return(concept)
+  elif i == 0:
     concept.add_relation('Trollinger', '15C')
     concept.add_relation('Trollinger', '16C')
 
@@ -573,26 +616,38 @@ def init_dataset(i):
   return(concept)
 
 
-# ['wines', 'alliance']
-concept = init_dataset(0)
+# [None => dataset, 0 => 'wines', 1 => 'alliance']
+
+concept = init_dataset()
+print('Initialized concept')
+
+# print(concept.objects_intent(['sneeze']))
 
 start1 = time.clock()
-pac = concept.pac_basis(concept.is_member, 0.2, 0.1)
+pac = concept.pac_basis(concept.is_member, 0.1, 0.8)
 end1 = time.clock() - start1
 
-start2 = time.clock()
-horn1 = concept.horn1(concept.is_member, concept.is_equivalent_probabilistic)
-end2 = time.clock() - start2
+# start2 = time.clock()
+# horn1 = concept.horn1(concept.is_member, concept.is_equivalent_probabilistic)
+# end2 = time.clock() - start2
 
-start3 = time.clock()
-horn2 = concept.horn1(concept.is_member, concept.is_equivalent_deterministic)
-end3 = time.clock() - start3
+# start3 = time.clock()
+# horn2 = concept.horn1(concept.is_member, concept.is_equivalent_deterministic)
+# end3 = time.clock() - start3
 
 
-print("PAC:", pac)
+# print("PAC:", pac)
+j=0
+for (antecedent_attrs, consequent_attrs) in pac:
+  j += 1
+  print("PAC Implication", j, ":", len(antecedent_attrs), "attributes:", " ->", len(consequent_attrs), "attributes with", len(concept.attributes_extent(set(consequent_attrs))), "objects")
+
+print("# of objects:", len(concept.objects()))
+print("# of attributes:", len(concept.attributes()))
+print("# of Implications:", len(pac))
 print(end1)
-print("Horn probabilistic:", horn1)
-print(end2)
-print("Horn Deterministic:", horn2)
-print(end3)
-concept.pretty_print()
+# print("Horn probabilistic:", horn1)
+# print(end2)
+# print("Horn Deterministic:", horn2)
+# print(end3)
+# concept.pretty_print()

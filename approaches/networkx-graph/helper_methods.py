@@ -1,5 +1,56 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import string
+import re
+
+# Iterative longest contiguous sequence. No one character matchings
+
+import string
+import re
+
+# Iterative longest contiguous sequence. No one character matchings
+
+def lcs(s1,s2):
+  longest = ""
+  i = 0
+  for x in s1:
+    if re.search(x, s2):
+      s = x
+      while re.search(s, s2):
+        if len(s)>len(longest):
+          longest = s
+        if i+len(s) == len(s1):
+          break
+        s = s1[i:i+len(s)+1]
+    i += 1
+  return longest
+
+def iterLCS(pdf):
+  # print(pdf)
+  sw1 = pdf['source']
+  sw2 = pdf['target']
+  longList = []
+  while True:
+    tempVal = lcs(sw1,sw2)
+    if len(tempVal)  <= 1:
+      break
+    
+    longList.append(tempVal)
+    sw1 = sw1.replace(tempVal,'#',1)
+    sw2 = sw2.replace(tempVal,'!',1)
+  #return [longList,[item for item in sw1.split('#') if len(item) > 0],[item for item in sw2.split('!') if len(item) > 0]]
+  pdf['common'] = longList
+  pdf['deleted'] = [item for item in sw1.split('#') if len(item) > 0]
+  
+  # if len(pdf['deleted']) == 0:
+  #   pdf['deleted'] = ['ϵ']
+  
+  pdf['added'] = [item for item in sw2.split('!') if len(item) > 0]
+  
+  # if len(pdf['added']) == 0:
+  #   pdf['added'] = ['ϵ']
+  
+  return pdf
 
 def compare(expected, actual):
   expected = set(expected)
