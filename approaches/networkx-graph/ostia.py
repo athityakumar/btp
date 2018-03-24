@@ -1,3 +1,5 @@
+import os
+
 class OTST:
   def __init__(self, T):
     """
@@ -12,7 +14,6 @@ class OTST:
     """
     :return first_element: First element in the OTST
     """
-
 
   def last:
     """
@@ -58,21 +59,30 @@ def prefixed_with(str, prefix):
   :param prefix: A prefix to check in the word / sub-word
   :return bool: True if prefix, else False
   """
+  return(str.find(prefix) == 0)
 
-def lcp(set_of_strings):
+def lcp(strings):
   # What's this? Longest common prefix
   # Given on page 449
+
+  return os.path.commonprefix(list(strings))
 
 def eliminate_prefix(u, v):
   """
   If v = uw (u=prefix, w=suffix),
-  w = inverse(u)v
+  w = u-1 v
 
   Returns suffix after eliminating prefix
 
   :param str: An input word / sub-word
   :return inv_str: An inversed string
   """
+
+  if v.find(u) == 0:
+    w = v[len(u):]
+  else:
+    w = v
+  return(w)
 
 def OSTIA(T):
   """
