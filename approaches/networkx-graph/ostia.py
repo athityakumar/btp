@@ -1,44 +1,77 @@
 import os
+import networkx as nx
 
 class OTST:
   def __init__(self, T):
     """
+    Initializes a Networkx DiGraph FST
     :param T: An input*output mapping
     """
 
-    # self.T = T
-    # tou = T
-    # self.tou = tou
+    self.graph = self.form_digraph(T)
 
-  def first:
+  def states(self):
+    """
+    :return states: A list of all states (nodes)
+    """
+
+    return list(self.graph.nodes)
+
+  def state(self, index):
+    """
+    :return state: The index-th state
+    """
+    state = self.states()[index]
+    return state
+
+  def first(self):
     """
     :return first_element: First element in the OTST
     """
+    return self.state(0)
 
-  def last:
+  def last(self):
     """
     :return last_element: Last element in the OTST
     """
+    return self.state(-1)
 
-  def next(a):
+  def next(self, a):
     """
     :param T: An element in the OTST
     :return next_element: Next element to a, in the OTST
     """
 
-  def merge(a, b):
+    all_states = self.states()
+    index_of_a = all_states.index(a)
+    if index_of_a == len(all_states)-1:
+      next_element = a
+    else:
+      next_element = self.state(index_of_a+1)
+    return next_element
+
+  # TODO
+  def merge(self, a, b):
     """
     :param a: An element in the OTST
     :param b: An element in the OTST
     :return merged_otst: OTST with elements a & b merged
     """
 
-  def subseq:
+    merged_otst = self.graph
+    # DO the merging
+    self.graph = merged_otst
+
+  def subseq(self):
     """
     :return bool: True if tou is subsequent, else False
     """
 
-  def find_subseq_violation:
+    violation = self.find_subseq_violation()
+    return(violation is None)
+
+  # TODO
+  def find_subseq_violation(self):
     """
     (r,a,v,s) and (r,a,w,t) are 2 edges of tou that violate subseq condition,
     with s<t
@@ -46,12 +79,31 @@ class OTST:
     :return (r, a, v, s, w, t): Tuple
     """
 
-  def push_back(element, edge):
+    # Iterate through all edge pairs
+    # If determinism condition present for any pair,
+    #   return edges
+    # Else return None
+
+  # TODO
+  def push_back(self, element, edge):
     """
     :param element: An element in the OTST
     :param edge: An edge in the OTST, as a tuple (r, a, v, s)
     :return tou: OTST with element pushed back from the edge
     """  
+
+  # TODO
+  def form_digraph(self, T):
+    """
+    :param T: A set of all input/output pairs
+    :return graph: A directed networkx graph
+    """
+
+    graph  = nx.DiGraph()
+    for (input_word, metadata, output_word) in T:
+
+    return(graph)
+
 
 def prefixed_with(str, prefix):
   """
@@ -62,10 +114,14 @@ def prefixed_with(str, prefix):
   return(str.find(prefix) == 0)
 
 def lcp(strings):
-  # What's this? Longest common prefix
-  # Given on page 449
+  """
+  Computes longest common prefix of given set of strings, given on page 449
+  :param strings: A set of strings
+  :return prefix: The longest common prefix
+  """
 
-  return os.path.commonprefix(list(strings))
+  prefix = os.path.commonprefix(list(strings))
+  return prefix
 
 def eliminate_prefix(u, v):
   """
@@ -102,6 +158,8 @@ def OSTIA(T):
       tou = tou.merge(p, q)
       while not tou.subseq() and not exit_condition_2:
         r, a, v, s, w, t = tou.find_subseq_violation()
+
+        # '#' depicts end of string
         exit_condition_2 = (v!=w and a='#') or (s<q and not prefixed_with(v, w)):
         if not exit_condition_2:
           u = lcp(v, w)
