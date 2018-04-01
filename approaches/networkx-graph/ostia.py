@@ -349,5 +349,9 @@ def fetch_input_output_pairs(language='english', quality='low'):
 
 T = fetch_input_output_pairs(quality='low')
 T = OSTIA(T)
+
+for path in nx.all_simple_paths(T.graph, 0, -1):
+  print(path)
+
 print(len(T.graph[0]))
 print(len(T.graph.in_edges(-1)))
