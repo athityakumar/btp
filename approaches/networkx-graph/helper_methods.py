@@ -11,6 +11,7 @@ import re
 # Iterative longest contiguous sequence. No one character matchings
 
 def lcs(s1,s2):
+  print(s1, s2)
   longest = ""
   i = 0
   for x in s1:
@@ -154,19 +155,19 @@ def map_edges_uid_to_weight(G):
 
 def pretty_print_graph(G):
   print("\n")
-  for node in G:
-    print("Node " + str(node) + " : " + str(G[node]))
+  # for node in G:
+  #   print("Node " + str(node) + " : " + str(G[node]))
   print("Number of nodes : ", len(G.nodes))
   print("Number of edges : ", len(G.edges))
 
-  length_freq = dict()
-  total_len   = 0
-  for node in G:
-    length_freq = update_dict(length_freq, len(node), 1)
-    total_len  += len(node)
-  total_length = sum([length*count for length, count in length_freq.items()])
-  print("Frequency of string-length of nodes : ", length_freq)
-  print("Average string-length of nodes : ", total_length / len(G.nodes))
+  # length_freq = dict()
+  # total_len   = 0
+  # for node in G:
+  #   length_freq = update_dict(length_freq, len(node), 1)
+  #   total_len  += len(node)
+  # total_length = sum([length*count for length, count in length_freq.items()])
+  # print("Frequency of string-length of nodes : ", length_freq)
+  # print("Average string-length of nodes : ", total_length / len(G.nodes))
 
 def mod_levenshtein(s1, s2):
   if len(s1) < len(s2):
@@ -219,3 +220,34 @@ def levenshtein(s1, s2):
     previous_row = current_row
 
   return(previous_row[-1])
+
+def get_io_chunks(s1, s2):
+    chunks = []
+    while len(s1) != 0 or len(s2) != 0 :
+        if len(s1) != 0 and len(s2) != 0:
+            l = lcs(s1, s2)
+            if s1.find(l) != 0:
+                chunks.append((s1[0], ''))
+                s1 = s1[1:]
+            elif l:
+                for c in list(l):
+                    chunks.append((c, c))
+                # chunks.append((l, l))
+                s1 = s1[len(l):]
+                s2 = s2[len(l):]
+            else:
+                for c in list(s1):
+                    chunks.append((c, ''))
+                # chunks.append((s1, ''))
+                s1 = ''
+        elif len(s1)!=0:
+            for c in list(s1):
+                chunks.append((c, ''))
+            # chunks.append((s1, ''))
+            s1 = ''
+        else:
+            for c in list(s2):
+                  chunks.append(('', c))
+            # chunks.append(('', s2))
+            s2 = ''
+    return chunks
