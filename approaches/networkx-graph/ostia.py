@@ -275,19 +275,17 @@ class OTST:
       c = 0
       j = 0
       for i in range(0, len(path)-1):
+        n += 1
         edge = graph[path[i]][path[i+1]]
         if edge['input']:
           if edge['input'] != edge['output']:
-            n += 1
             if edge['input'] == word[j]:
               c += 1
         if edge['input'] == word[j]:
+          c += 1
           j += 1
 
-      if n == 0:
-        score = 1.0
-      else:
-        score = float(c/n)
+      score = float(c/n)
       return score
 
     def normalized_score(closeness_score, compatibility_score):
@@ -304,7 +302,7 @@ class OTST:
       normalized = normalized_score(closeness, compatibility)
       path_ways.append((path, normalized))
 
-    path = sorted(path_ways, key=operator.itemgetter(1), reverse=True)[0][0]
+    path = sorted(path_ways, key=operator.itemgetter(1))[0][0]
     # print(path)
     # print(word_from_path(induced_subgraph, path))
 
@@ -391,8 +389,6 @@ def OSTIA(T):
       tou_dup = tou
       # tou = tou.merge(p, q)
       tou = tou.merge(q, p)
-      pretty_print_graph(tou.graph)
-      print(tou.subseq())
       while not tou.subseq() and not exit_condition_2:
         r, a, v, s, w, t = tou.find_subseq_violation()
 
@@ -450,6 +446,7 @@ def fetch_testing_data(language='english'):
 
 def check_all_testing_data(model):
   c = n = 0
+  l = {}
   T = fetch_testing_data(language='english')
   for (source, metadatas, expected_dest) in T:
     try:
@@ -458,11 +455,17 @@ def check_all_testing_data(model):
         print("{} + {} was expected and received as {}".format(source, metadatas, predicted_dest))
         c += 1
       else:
+        dist = mod_levenshtein(expected_dest, predicted_dest)
+        if dist in l:
+          l[dist] += 1
+        else:
+          l[dist] = 1
         print("{} + {} was expected to be {}, but received {} instead".format(source, metadatas, expected_dest, predicted_dest))
       n += 1
     except IndexError:
       print("Some error with the source word {}".format(source))
   print("\n\nExact word-match accuracy: {}". format(100.00*float(c)/float(n)))
+  print("\n Levenshtein distribution:", l)
 
 T = fetch_input_output_pairs(language='english', quality='low')
 T = OSTIA(T)
