@@ -11,7 +11,6 @@ import re
 # Iterative longest contiguous sequence. No one character matchings
 
 def lcs(s1,s2):
-  print(s1, s2)
   longest = ""
   i = 0
   for x in s1:
@@ -226,15 +225,21 @@ def get_io_chunks(s1, s2):
     while len(s1) != 0 or len(s2) != 0 :
         if len(s1) != 0 and len(s2) != 0:
             l = lcs(s1, s2)
-            if s1.find(l) != 0:
-                chunks.append((s1[0], ''))
-                s1 = s1[1:]
-            elif l:
+            print(s1, s2, l)
+            if s1.find(l) == 0 and l:
                 for c in list(l):
                     chunks.append((c, c))
-                # chunks.append((l, l))
                 s1 = s1[len(l):]
                 s2 = s2[len(l):]
+            elif l:
+                if s2.find(l) == 0:
+                    chunks.append((s1[0], ''))
+                    s1 = s1[1:]
+                else:
+                    for c in list(s2[:s2.find(l)]):
+                        chunks.append(('', c))
+                    # chunks.append((l, l))
+                    s2 = s2[s2.find(l):]
             else:
                 for c in list(s1):
                     chunks.append((c, ''))

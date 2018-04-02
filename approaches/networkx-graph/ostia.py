@@ -63,8 +63,15 @@ class Transducer(nx.DiGraph):
     """
 
     contextual_states = set(self.states())
+    contextual_states.add(0)
+    contextual_states.add(-1)
+
     for metadata in metadatas:
-      contextual_states = contextual_states.intersection(set(self[metadata]))
+      try:
+        contextual_states = contextual_states.intersection(set(self[metadata]))
+      except KeyError:
+        contextual_states = contextual_states
+
     contextual_subgraph = self.subgraph(list(contextual_states))
     return(contextual_subgraph)
 
@@ -132,10 +139,13 @@ class OTST:
     graph = self.graph
 
     for (from_state, _) in graph.in_edges(b):
-      input = graph[from_state][b]['input']
-      output = graph[from_state][b]['output']
-      # print(input, output)
-      graph.add_edge(from_state, a, input=input, output=output)
+      try: 
+        input = graph[from_state][b]['input']
+        output = graph[from_state][b]['output']
+        # print(input, output)
+        graph.add_edge(from_state, a, input=input, output=output)
+      except KeyError:
+        graph.add_edge(from_state, a)
 
     for to_state in graph[b]:
       input = graph[b][to_state]['input']
@@ -172,11 +182,11 @@ class OTST:
     states = graph.states()
     for state in states:
       neighbors = graph[state]
-      print(len(neighbors))
+      # print(len(neighbors))
       for neighbor_1 in neighbors:
         for neighbor_2 in neighbors:
           if neighbor_1 != neighbor_2:
-            print("Yo")
+            # print("Yo")
             edge_1 = graph[state][neighbor_1]
             edge_2 = graph[state][neighbor_2]
             if edge_1['input'] == edge_2['input'] and edge_1['output'] == edge_2['output']:
@@ -207,6 +217,10 @@ class OTST:
     """
 
     graph = Transducer()
+
+    graph.add_node('start')
+    graph.add_node('stop')
+
     graph.add_node(0)  # For start
     graph.add_node(-1) # For stop
 
@@ -216,8 +230,10 @@ class OTST:
 
       io_chunks = get_io_chunks(input_word, output_word)
       io_chunks += [('#','#')]
+
+      # print(input_word, output_word, io_chunks)
       for (i, (input_chunk, output_chunk)) in enumerate(io_chunks):
-        from_state = 0 if i == 0 else graph.add_state()
+        from_state = 0 if i == 0 else to_state
         to_state = -1  if i == len(io_chunks)-1 else graph.add_state()
         for metadata in metadatas:
           graph.add_edge(metadata, from_state)
@@ -234,6 +250,79 @@ class OTST:
 
     return(graph)
 
+  def guess_output_for(self, word, metadatas):
+    def word_from_path(graph, path):
+      path_input_word = ''
+
+      for i in range(0, len(path)-1):
+        edge = graph[path[i]][path[i+1]]
+        path_input_word += edge['input']
+
+      # print(path_input_word)
+      return(path_input_word[:-1])
+
+    def closeness_score(word, path_input_word):
+      distance = mod_levenshtein(word, path_input_word)
+      if distance >= len(word):
+        score = 0.0
+      else:
+        score = 1.0 - float(distance/len(word))
+
+      return score
+
+    def compatibility_score(graph, path, word):
+      n = 0
+      c = 0
+      j = 0
+      for i in range(0, len(path)-1):
+        edge = graph[path[i]][path[i+1]]
+        if edge['input']:
+          if edge['input'] != edge['output']:
+            n += 1
+            if edge['input'] == word[j]:
+              c += 1
+        if edge['input'] == word[j]:
+          j += 1
+
+      if n == 0:
+        score = 1.0
+      else:
+        score = float(c/n)
+      return score
+
+    def normalized_score(closeness_score, compatibility_score):
+      return (closeness_score+compatibility_score)/2.0
+
+    output = ''
+    induced_subgraph = self.graph.contextual_subgraph(metadatas)
+    paths = nx.all_simple_paths(induced_subgraph, 0, -1)
+    path_ways = []
+    for i, path in enumerate(paths):
+      path_word = word_from_path(induced_subgraph, path)
+      closeness = closeness_score(word, path_word)
+      compatibility = compatibility_score(induced_subgraph, path, word)
+      normalized = normalized_score(closeness, compatibility)
+      path_ways.append((path, normalized))
+
+    path = sorted(path_ways, key=operator.itemgetter(1), reverse=True)[0][0]
+    # print(path)
+    # print(word_from_path(induced_subgraph, path))
+
+    j = 0
+    for i in range(0, len(path)-1):
+      edge = induced_subgraph[path[i]][path[i+1]]
+      # print(edge, i, j, output)
+      if edge['input']:
+        if j < len(word):
+          if edge['input'] == word[j]:
+            output += edge['output']
+          else:
+            output += word[j]
+          j += 1
+      else:
+        output += edge['output']
+
+    return output
 
 def is_prefixed_with(str, prefix):
   """
@@ -266,7 +355,6 @@ def eliminate_suffix(v, w):
 
   u = v.rstrip(w)
   return(u)
-
 
 def eliminate_prefix(u, v):
   """
@@ -346,12 +434,42 @@ def fetch_input_output_pairs(language='english', quality='low'):
   T = sorted(T, key=operator.itemgetter(0))
   return T
 
+def fetch_testing_data(language='english'):
+  filepath = "../daru-dataframe/spec/fixtures/{}-dev".format(language)
+  T = list()
+  file = open(filepath,'r')
+  for line in file.readlines():
+    source, expected_dest, metadata = line.split("\t")
+    if not "*" in source and not "*" in expected_dest:
+      metadata = metadata.strip("\n").split(";")
+      T.append((source, metadata, expected_dest))
+      # print("{} + {} = {}".format(source, " + ".join(metadata), dest))
+  print("Providing all test words in structured manner, to OSTIA")
+  T = sorted(T, key=operator.itemgetter(0))
+  return T
 
-T = fetch_input_output_pairs(quality='low')
+def check_all_testing_data(model):
+  c = n = 0
+  T = fetch_testing_data(language='english')
+  for (source, metadatas, expected_dest) in T:
+    try:
+      predicted_dest = model.guess_output_for(source, metadatas)
+      if predicted_dest == expected_dest:
+        print("{} + {} was expected and received as {}".format(source, metadatas, predicted_dest))
+        c += 1
+      else:
+        print("{} + {} was expected to be {}, but received {} instead".format(source, metadatas, expected_dest, predicted_dest))
+      n += 1
+    except IndexError:
+      print("Some error with the source word {}".format(source))
+  print("\n\nExact word-match accuracy: {}". format(100.00*float(c)/float(n)))
+
+T = fetch_input_output_pairs(language='english', quality='low')
 T = OSTIA(T)
+# print(len(T.graph[0]))
+# print(len(T.graph.in_edges(-1)))
+# for path in nx.all_simple_paths(T.graph, source=0, target=-1):
+#   print(path)
 
-for path in nx.all_simple_paths(T.graph, 0, -1):
-  print(path)
-
-print(len(T.graph[0]))
-print(len(T.graph.in_edges(-1)))
+check_all_testing_data(T)
+# print(T.guess_output_for('match', ['V', 'PST']))
