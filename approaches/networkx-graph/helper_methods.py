@@ -138,9 +138,9 @@ def read_wordpairs(path):
   wordpairs = dict()
   for line in file.readlines():
     source, dest, metadata = line.split("\t")
-    metadata = metadata.replace("\n", "").split(";")
-    if "V" in metadata and "PRS" in metadata:
-      wordpairs[source] = dest
+    # metadata = metadata.replace("\n", "").split(";")
+    # if "V" in metadata and "PRS" in metadata:
+    wordpairs[source] = dest
 
     # if len(source) < 10 and len(dest) < 15:
   return(wordpairs)

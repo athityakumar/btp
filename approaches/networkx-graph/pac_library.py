@@ -600,6 +600,17 @@ def generate_operations_for_a_wordpair(source, dest):
 
   return(operations)
 
+def init_concept_from_wordpairs(wordpairs):
+  concept = Concept()
+  for (source, target) in wordpairs:
+    if not "*" in source and not "*" in target:
+      mutations = iterLCS({'source': source, 'target': target})
+      for addition in mutations['added']:
+        concept.add_relation("insert_"+addition, source)
+      for deletion in mutations['deleted']:
+        concept.add_relation("delete_"+deletion, source)
+  return(concept)
+
 def init_dataset(i=None):
   concept = Concept()
   if isinstance(i, str):
