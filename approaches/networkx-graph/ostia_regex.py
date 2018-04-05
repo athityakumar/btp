@@ -236,7 +236,7 @@ class OTST:
         to_state = -1  if i == len(io_chunks)-1 else graph.add_state()
         graph.add_arc(from_state, input_char, input_char, to_state)
 
-    print("Done forming the directed FST graph")      
+    # print("Done forming the directed FST graph")      
     # Do something
     # Add naive edges and states
     # States merging will be taken care of, by OSTIA
@@ -245,22 +245,22 @@ class OTST:
 
     return(graph)
 
+  def word_from_path(self, graph, path):
+    path_input_word = ''
+
+    for i in range(0, len(path)-1):
+      edge = graph[path[i]][path[i+1]]
+      path_input_word += edge['input']
+    return path_input_word
+
   def matches_any_path(self, new_word):
-    def word_from_path(graph, path):
-      path_input_word = ''
-
-      for i in range(0, len(path)-1):
-        edge = graph[path[i]][path[i+1]]
-        print(edge)
-        path_input_word += edge['input']
-
     graph = self.graph
-    paths = nx.all_simple_paths(graph, 'start', 'stop')
-    words = [word_from_path(graph, path) for path in paths]
+    words = []
+    for path in list(nx.all_simple_paths(graph, 0, -1)):
+      words.append(self.word_from_path(graph, list(path)))
     min_ldist = len(new_word)
     closest_word = new_word
     for word in words:
-      print(word, new_word)
       lp, lr, ls, rp, rr, rs = alignprs(word, new_word)
       lp = lp.replace('_', '')
       lr = lr.replace('_', '')
@@ -269,7 +269,7 @@ class OTST:
       rr = rr.replace('_', '')
       rs = rs.replace('_', '')
       score = levenshtein(lp, rp)[-1] + levenshtein(ls, rs)[-1] + levenshtein(lr, rr)[-1]
-      score = float(score) / (len(word) + len(new_word))
+      score = float(score) / len(new_word)
       if score < min_ldist:
         min_ldist = score
         closest_word = word
@@ -354,10 +354,8 @@ class OTST:
     pb, sb = 0, 0
     lines = [line.strip() for line in codecs.open("../daru-dataframe/spec/fixtures/{}-train-{}".format(lang, quality), "r", encoding="utf-8")]
     for l in lines:
-      print(l.split(u'\t'))
       lemma, form, _ = l.split(u'\t')
       aligned = halign(str(lemma), str(form))
-      print(lemma, form, aligned)
       if ' ' not in aligned[0] and ' ' not in aligned[1] and '-' not in aligned[0] and '-' not in aligned[1]:
         pb += numleadingsyms(aligned[0],'_') + numleadingsyms(aligned[1],'_')
         sb += numtrailingsyms(aligned[0],'_') + numtrailingsyms(aligned[1],'_')

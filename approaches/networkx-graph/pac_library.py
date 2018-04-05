@@ -577,8 +577,6 @@ class Concept(nx.Graph):
   def pac_basis(self, is_member, epsilon=0.8, delta=0.5):
     return(self.horn1(is_member, self.is_approx_equivalent(is_member, epsilon, delta)))
 
-
-
 def generate_operations_for_a_wordpair(source, dest):
   operations = list()
 
