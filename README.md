@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-This is my BTech project at IIT Kharagpur under Prof. Pawan Goyal of Computer Science Department, with guidance from Amrith Krishna and working along with Gaurav Sahu.
+This is my BTech project at IIT Kharagpur under Prof. Pawan Goyal of Computer Science Department, with guidance from Amrith Krishna and working along with [Gaurav Sahu](https://github.com/demfier).
 
 For chronological minutes of the meeting information, have a look at the [MINUTES.md](MINUTES.md) file.
 
