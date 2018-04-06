@@ -29,8 +29,10 @@ def inflect(word, operations):
       word = word + chunk
   return word
 
-pac = pickle.load(open('global_high_pac.p', 'rb'))
-testing_data = fetch_testing_data()
+language = 'polish'
+quality = 'high'
+pac = pickle.load(open("{}_{}_pac.p".format(language, quality), 'rb'))
+testing_data = fetch_testing_data(language=language)
 n = c = 0
 
 for (source, metadata, expected_dest) in testing_data:

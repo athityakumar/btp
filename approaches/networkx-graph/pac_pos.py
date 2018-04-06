@@ -34,7 +34,9 @@ def parse_metadata_fca(metadata_words):
     metadata_fca[metadata] = (concept, pac, end1)
   return(metadata_fca)
 
-metadata_words = parse_metadata_words(quality='high')
+language = 'polish'
+quality = 'high'
+metadata_words = parse_metadata_words(language=language, quality=quality)
 metadata_fca = parse_metadata_fca(metadata_words)
 print(metadata_fca)
 for metadata in metadata_fca:
@@ -51,5 +53,5 @@ for metadata in metadata_fca:
     print("# of Implications:", len(pac))
     print(end1)
 
-with open('global_high_pac.p', 'wb') as pacout:
+with open("{}_{}_pac.p".format(language, quality), 'wb') as pacout:
   pickle.dump(metadata_fca, pacout)
