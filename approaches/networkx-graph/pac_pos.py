@@ -34,24 +34,34 @@ def parse_metadata_fca(metadata_words):
     metadata_fca[metadata] = (concept, pac, end1)
   return(metadata_fca)
 
-language = 'polish'
-quality = 'high'
-metadata_words = parse_metadata_words(language=language, quality=quality)
-metadata_fca = parse_metadata_fca(metadata_words)
-print(metadata_fca)
-for metadata in metadata_fca:
-  print(metadata)
-  concept, pac, end1 = metadata_fca[metadata]
-  j=0
-  if pac:
-    for (antecedent_attrs, consequent_attrs) in pac:
-      j += 1
-      print("PAC Implication", j, ":", len(antecedent_attrs), "attributes:", " ->", len(consequent_attrs), "attributes with", len(concept.attributes_extent(set(consequent_attrs))), "objects : ", concept.attributes_extent(set(consequent_attrs)))
+languages = os.listdir('../daru-dataframe/spec/fixtures/')
+langs = set()
 
-    print("# of objects:", len(concept.objects()))
-    print("# of attributes:", len(concept.attributes()))
-    print("# of Implications:", len(pac))
-    print(end1)
+for l in languages:
+    if '-train' not in l:
+        continue
+    else:
+        langs.add(l.split('-train')[0])
 
-with open("{}_{}_pac.p".format(language, quality), 'wb') as pacout:
-  pickle.dump(metadata_fca, pacout)
+quality = 'medium'
+
+for language in langs:
+  metadata_words = parse_metadata_words(language=language, quality=quality)
+  metadata_fca = parse_metadata_fca(metadata_words)
+  print(metadata_fca)
+  for metadata in metadata_fca:
+    print(metadata)
+    concept, pac, end1 = metadata_fca[metadata]
+    j=0
+    if pac:
+      for (antecedent_attrs, consequent_attrs) in pac:
+        j += 1
+        print("PAC Implication", j, ":", len(antecedent_attrs), "attributes:", " ->", len(consequent_attrs), "attributes with", len(concept.attributes_extent(set(consequent_attrs))), "objects : ", concept.attributes_extent(set(consequent_attrs)))
+
+      print("# of objects:", len(concept.objects()))
+      print("# of attributes:", len(concept.attributes()))
+      print("# of Implications:", len(pac))
+      print(end1)
+
+  with open("{}_{}_pac.p".format(language, quality), 'wb') as pacout:
+    pickle.dump(metadata_fca, pacout)
