@@ -150,6 +150,5 @@ for language in langs:
     if n==0:
       n = 1
     lang_acc_map[language] = (100*float(c)/ n)
-
-with open('lang_acc.json', 'w') as lang_out:
-    json.dump(lang_acc_map, lang_out)
+    with open('lang_acc.json', 'w') as lang_out:
+        json.dump(lang_acc_map, lang_out)
