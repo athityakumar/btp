@@ -6,6 +6,8 @@ from pac_library import *
 import _pickle as pickle
 import ostia_regex
 import pandas as pd
+import os
+import json
 
 def fetch_testing_data(language='english'):
   filepath = "../daru-dataframe/spec/fixtures/{}-dev".format(language)
@@ -85,55 +87,69 @@ def deterministic_pac(concept):
   pac = structure_df_to_pac(df)
   return pac
 
-language = 'english'
-quality = 'high'
-metadata_words = parse_metadata_words(language=language, quality=quality)
+languages = os.listdir('../daru-dataframe/spec/fixtures/')
+langs = set()
 
-pac = parse_metadata_fca(metadata_words)
-testing_data = fetch_testing_data(language=language)
-n = c = 0
+for l in languages:
+    if '-train' not in l:
+        continue
+    else:
+        langs.add(l.split('-train')[0])
 
-for (source, metadata, expected_dest) in testing_data:
-  scores = []
-  if metadata not in pac:
-    continue
-  concept, cluster, _ = pac[metadata]
-  if not cluster:
-    continue
+lang_acc_map = {}
 
-  for (antecedent_attrs, consequent_attrs) in cluster:
-    ostia = ostia_regex.OSTIA(consequent_attrs)
-    scores.append((consequent_attrs, ostia.matches_any_path(source)))
+quality = 'medium'
+for language in langs:
+    metadata_words = parse_metadata_words(language=language, quality=quality)
 
-  scores = sorted(scores, key=lambda x: x[1][0])
-  cluster_words, (min_score, closest_word) = scores[0]
-  just_scores = [s[0] for _, s in scores]
+    pac = parse_metadata_fca(metadata_words)
+    testing_data = fetch_testing_data(language=language)
+    n = c = 0
 
-  if just_scores.count(min_score) == 1:
-    operations = concept.objects_intent(set(cluster_words))
-  else:
-    max_operations = 0
-    index_of_min_score = 0
-    for i, s in enumerate(scores[0:just_scores.count(min_score)]):
-      this_cluster, (score, _) = s
-      operations = concept.objects_intent(set(this_cluster))
-      if len(operations) > max_operations:
-        max_operations = len(operations)
-        cluster_words = this_cluster
-        index_of_min_score = i
-    closest_word = scores[index_of_min_score][1][1]
-    operations = concept.objects_intent(set(cluster_words))
-    print(len(operations))
+    for (source, metadata, expected_dest) in testing_data:
+      scores = []
+      if metadata not in pac:
+        continue
+      concept, cluster, _ = pac[metadata]
+      if not cluster:
+        continue
 
-  computed_dest = inflect(source, operations)
-  if computed_dest == expected_dest:
-    c += 1
-    print("{} + {}: Expected and found {}".format(source, metadata, computed_dest))
-  else:
-    print("{} + {}: Expected {} but found {}".format(source, metadata, expected_dest, computed_dest))
-  print("due to {} with score {}".format(closest_word, min_score))
-  n += 1
-  # do operations
-if n==0:
-  n = 1
-print(100*float(c)/ n)
+      for (antecedent_attrs, consequent_attrs) in cluster:
+        ostia = ostia_regex.OSTIA(consequent_attrs)
+        scores.append((consequent_attrs, ostia.matches_any_path(source)))
+
+      scores = sorted(scores, key=lambda x: x[1][0])
+      cluster_words, (min_score, closest_word) = scores[0]
+      just_scores = [s[0] for _, s in scores]
+
+      if just_scores.count(min_score) == 1:
+        operations = concept.objects_intent(set(cluster_words))
+      else:
+        max_operations = 0
+        index_of_min_score = 0
+        for i, s in enumerate(scores[0:just_scores.count(min_score)]):
+          this_cluster, (score, _) = s
+          operations = concept.objects_intent(set(this_cluster))
+          if len(operations) > max_operations:
+            max_operations = len(operations)
+            cluster_words = this_cluster
+            index_of_min_score = i
+        closest_word = scores[index_of_min_score][1][1]
+        operations = concept.objects_intent(set(cluster_words))
+        print(len(operations))
+
+      computed_dest = inflect(source, operations)
+      if computed_dest == expected_dest:
+        c += 1
+        print("{} + {}: Expected and found {}".format(source, metadata, computed_dest))
+      else:
+        print("{} + {}: Expected {} but found {}".format(source, metadata, expected_dest, computed_dest))
+      print("due to {} with score {}".format(closest_word, min_score))
+      n += 1
+      # do operations
+    if n==0:
+      n = 1
+    lang_acc_map[language] = (100*float(c)/ n)
+
+with open('lang_acc.json', 'w') as lang_out:
+    json.dump(lang_acc_map, lang_out)
