@@ -590,43 +590,40 @@ def OSTIA(T):
   exit_condition_1 = exit_condition_2 = False
 
   tou = tou_dup = OTST(T)
-#   pretty_print_graph(tou.graph)
+  q = tou.first()
+  while q < tou.last():
+    q = tou.next(q)
+    # print(q)
+    p = tou.first()
+    # print(p<q)
+    while p < q and not exit_condition_1:
+      tou_dup = tou
+      # tou = tou.merge(p, q)
+      tou = tou.merge(q, p)
+      while not tou.subseq() and not exit_condition_2:
+        r, a, v, s, w, t = tou.find_subseq_violation()
 
-#   q = tou.first()
-#   while q < tou.last():
-#     q = tou.next(q)
-#     # print(q)
-#     p = tou.first()
-#     # print(p<q)
-#     while p < q and not exit_condition_1:
-#       tou_dup = tou
-#       # tou = tou.merge(p, q)
-#       tou = tou.merge(q, p)
-#       while not tou.subseq() and not exit_condition_2:
-#         r, a, v, s, w, t = tou.find_subseq_violation()
+        print(r, a, v, s, w, t)
+        # '#' depicts end of string
+        exit_condition_2 = (v!=w and a=='#') or (s<q and not is_prefixed_with(v, w))
+        if not exit_condition_2:
+          u = lcp([v, w])
+          tou = tou.push_back(eliminate_prefix(u, v), (r, a, v, s))
+          tou = tou.push_back(eliminate_prefix(u, w), (r, a, w, t))
+          # tou = tou.merge(s, t)
+          tou = tou.merge(t, s)
+          # pretty_print_graph(tou.graph)
 
-#         print(r, a, v, s, w, t)
-#         # '#' depicts end of string
-#         exit_condition_2 = (v!=w and a=='#') or (s<q and not is_prefixed_with(v, w))
-#         if not exit_condition_2:
-#           u = lcp([v, w])
-#           tou = tou.push_back(eliminate_prefix(u, v), (r, a, v, s))
-#           tou = tou.push_back(eliminate_prefix(u, w), (r, a, w, t))
-#           # tou = tou.merge(s, t)
-#           tou = tou.merge(t, s)
-#           # pretty_print_graph(tou.graph)
+      if not tou.subseq():
+        tou = tou_dup
+      else:
+        exit_condition_1 = True
 
-#       if not tou.subseq():
-#         tou = tou_dup
-#       else:
-#         exit_condition_1 = True
+      if not exit_condition_1:
+        p = tou.next(p)
+    if not tou.subseq():
+      tou = tou_dup
 
-#       if not exit_condition_1:
-#         p = tou.next(p)
-#     if not tou.subseq():
-#       tou = tou_dup
-
-#   pretty_print_graph(tou.graph)
   return tou
 
 def fetch_input_output_pairs(language='english', quality='low'):

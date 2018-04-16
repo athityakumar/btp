@@ -220,6 +220,35 @@ def levenshtein(s1, s2):
 
   return(previous_row[-1])
 
+def halign(s,t):
+    """Align two strings by Hamming distance."""
+    slen = len(s)
+    tlen = len(t)    
+    minscore = len(s) + len(t) + 1
+    for upad in range(0, len(t)+1):
+        upper = '_' * upad + s + (len(t) - upad) * '_'
+        lower = len(s) * '_' + t
+        score = hamming(upper, lower)
+        if score < minscore:
+            bu = upper
+            bl = lower
+            minscore = score
+
+    for lpad in range(0, len(s)+1):
+        upper = len(t) * '_' + s
+        lower = (len(s) - lpad) * '_' + t + '_' * lpad
+        score = hamming(upper, lower)
+        if score < minscore:
+            bu = upper
+            bl = lower
+            minscore = score
+
+    zipped = zip(bu,bl)
+    newin  = ''.join(i for i,o in zipped if i != '_' or o != '_')
+    newout = ''.join(o for i,o in zipped if i != '_' or o != '_')
+    return newin, newout
+
+
 def get_io_chunks(s1, s2):
     chunks = []
     while len(s1) != 0 or len(s2) != 0 :
@@ -227,6 +256,7 @@ def get_io_chunks(s1, s2):
             l = lcs(s1, s2)
             print(s1, s2, l)
             if s1.find(l) == 0 and l:
+                # chunks.append((l, l))
                 for c in list(l):
                     chunks.append((c, c))
                 s1 = s1[len(l):]
@@ -238,7 +268,7 @@ def get_io_chunks(s1, s2):
                 else:
                     for c in list(s2[:s2.find(l)]):
                         chunks.append(('', c))
-                    # chunks.append((l, l))
+                    # chunks.append(('', l))
                     s2 = s2[s2.find(l):]
             else:
                 for c in list(s1):

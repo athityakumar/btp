@@ -80,6 +80,15 @@ class Transducer(nx.DiGraph):
   def add_arc(self, from_state, input, output, to_state):
     self.add_edge(from_state, to_state, input=input, output=output)
 
+  def arcs(self):
+    edges = []
+    states = self.states() + [0, -1]
+    for edge in self.edges:
+      node_1, node_2 = edge
+      if node_1 in states and node_2 in states:
+        edges.append(edge)
+    return(edges)
+
 class OTST:
   def __init__(self, T):
     """
@@ -181,18 +190,28 @@ class OTST:
     # Else return None
     
     graph = self.graph
-    states = graph.states()
+    states = [0, -1] + self.states() # Manually add start and stop nodes
+    # all_arcs = graph.arcs()
+
     for state in states:
       neighbors = graph[state]
-      # print(len(neighbors))
       for neighbor_1 in neighbors:
         for neighbor_2 in neighbors:
-          if neighbor_1 != neighbor_2:
-            # print("Yo")
-            edge_1 = graph[state][neighbor_1]
-            edge_2 = graph[state][neighbor_2]
-            if edge_1['input'] == edge_2['input'] and edge_1['output'] == edge_2['output']:
-              return((state, edge_1['input'], edge_1['output'], neighbor_1, edge_2['output'], neighbor_2))
+          if neighbor_1 == neighbor_2:
+            continue
+          edge_1 = graph[state][neighbor_1]
+          edge_2 = graph[state][neighbor_2]
+          if edge_1['input'] == edge_2['input'] and edge_1['output'] == edge_2['output']:
+            return((state, edge_1['input'], edge_1['output'], neighbor_1, edge_2['output'], neighbor_2))
+
+    # # for (node_1a, node_1b) in all_arcs:
+    # #   edge_1 = graph[node_1a][node_1b]
+    # #   for (node_2a, node_2b) in all_arcs:
+    # #     if not (node_1a == node_2a and node_1b == node_2b):
+    # #       edge_2 = graph[node_2a][node_2b]
+    #       if node_1a == node_2a and edge_1['input'] == edge_2['input'] and edge_1['output'] == edge_2['output']:
+    #         return((node_1a, edge_1['input'], edge_1['output'], node_1b, edge_2['output'], node_2b))
+    return(None)
 
   def push_back(self, element, edge):
     """
@@ -220,9 +239,6 @@ class OTST:
 
     graph = Transducer()
 
-    graph.add_node('start')
-    graph.add_node('stop')
-
     graph.add_node(0)  # For start
     graph.add_node(-1) # For stop
 
@@ -242,8 +258,8 @@ class OTST:
           graph.add_edge(metadata, to_state)
         graph.add_arc(from_state, input_chunk, output_chunk, to_state)
 
-
-    print("Done forming the directed FST graph")      
+    # graph.add_state(-2) # Backup stop state
+    print("Done forming the directed FST graph")
     # Do something
     # Add naive edges and states
     # States merging will be taken care of, by OSTIA
@@ -252,225 +268,67 @@ class OTST:
 
     return(graph)
 
-  def guess_output_for(self, lang, quality):
-    def word_from_path(graph, path):
-      path_input_word = ''
+  def word_from_path(self, graph, path):
+    path_input_word = ''
 
-      for i in range(0, len(path)-1):
-        edge = graph[path[i]][path[i+1]]
-        path_input_word += edge['input']
+    for i in range(0, len(path)-1):
+      edge = graph[path[i]][path[i+1]]
+      path_input_word += edge['input']
+    return(path_input_word)
 
-      # print(path_input_word)
-      return(path_input_word[:-1])
-
-    def closeness_score(word, path_input_word):
-      distance = mod_levenshtein(word, path_input_word)
-      if distance >= len(word):
-        score = 0.0
-      else:
-        score = 1.0 - float(distance/len(word))
-
-      return score
-
-    def compatibility_score(graph, path, word):
-      n = 0
-      c = 0
-      j = 0
-      for i in range(0, len(path)-1):
-        n += 1
-        edge = graph[path[i]][path[i+1]]
-        if edge['input']:
-          if edge['input'] != edge['output']:
-            if edge['input'] == word[j]:
-              c += 1
-        if edge['input'] == word[j]:
-          c += 1
-          j += 1
-
-      score = float(c/n)
-      return score
-
-    def normalized_score(closeness_score, compatibility_score):
-      return (closeness_score+compatibility_score)/2.0
-
-    # out = ''
-    # metadatas = []
-    # word = ''
-    # induced_subgraph = self.graph.contextual_subgraph(metadatas)
-    # paths = nx.all_simple_paths(induced_subgraph, 0, -1)
-    # path_ways = []
-    # for i, path in enumerate(paths):
-    #   path_word = word_from_path(induced_subgraph, path)
-    #   closeness = closeness_score(word, path_word)
-    #   try:
-    #     compatibility = compatibility_score(induced_subgraph, path, word)
-    #   except IndexError:
-    #     compatibility = 0
-    #   normalized = normalized_score(closeness, compatibility)
-    #   path_ways.append((path, normalized))
-
-    # path = sorted(path_ways, key=operator.itemgetter(1))[0][0]
-    # print(path)
-    # print(word_from_path(induced_subgraph, path))
-
-    # j = 0
-    # for i in range(0, len(path)-1):
-    #   edge = induced_subgraph[path[i]][path[i+1]]
-    #   # print(edge, i, j, output)
-    #   if edge['input']:
-    #     if j < len(word):
-    #       if edge['input'] == word[j]:
-    #         out += edge['output']
-    #       else:
-    #         out += word[j]
-    #       j += 1
-    #     else:
-    #       out += edge['output']
-    runningavgLow, runningavgMed, runningavgHigh, numiterLow, numiterMed, numiterHigh = 0.0, 0.0, 0.0, 0, 0, 0
-
-    pb, sb = 0, 0
-    lines = [line.strip() for line in codecs.open("../daru-dataframe/spec/fixtures/{}-train-{}".format(lang, quality), "r", encoding="utf-8")]
-    for l in lines:
-      print(l.split(u'\t'))
-      lemma, form, _ = l.split(u'\t')
-      aligned = halign(str(lemma), str(form))
-      print(lemma, form, aligned)
-      if ' ' not in aligned[0] and ' ' not in aligned[1] and '-' not in aligned[0] and '-' not in aligned[1]:
-        pb += numleadingsyms(aligned[0],'_') + numleadingsyms(aligned[1],'_')
-        sb += numtrailingsyms(aligned[0],'_') + numtrailingsyms(aligned[1],'_')
-
-    allprules, allsrules = {}, {}
-    for l in lines:
-      if pb > sb:
-        lemma = lemma[::-1]
-        form = form[::-1]
-      lemma, form, pos = l.split(u'\t')
-      pos = pos.strip()
-      prules, srules = prefix_suffix_rules_get(lemma, form)
-
-      if pos not in allprules and len(prules) > 0:
-        allprules[pos] = {}
-      if pos not in allsrules and len(srules) > 0:
-        allsrules[pos] = {}
-
-      for r in prules:
-        if (r[0],r[1]) in allprules[pos]:
-          allprules[pos][(r[0],r[1])] = allprules[pos][(r[0],r[1])] + 1
-        else:
-          allprules[pos][(r[0],r[1])] = 1
-
-      for r in srules:
-        if (r[0],r[1]) in allsrules[pos]:
-          allsrules[pos][(r[0],r[1])] = allsrules[pos][(r[0],r[1])] + 1
-        else:
-          allsrules[pos][(r[0],r[1])] = 1
-
-    # morphological calculations
-    devlines = [line.strip() for line in open("../daru-dataframe/spec/fixtures/{}-dev".format(lang), "r").readlines()]
-    numcorrect = 0
-    numguesses = 0
-    print(len(allsrules))
-    print(len(allprules))
-    for l in devlines:
-      lemma, correct, pos = l.split(u'\t')
-      lemmaorig = lemma
-      if pb > sb:
-        lemma = lemma[::-1]
-      outform = apply_best_rule(lemma, pos, allprules, allsrules)
-      if pb > sb:
-        outform = outform[::-1]
-      if outform == correct:
-        numcorrect += 1
-      numguesses += 1
-    print(numcorrect)
-    print(numcorrect/float(numguesses))
-    return True
+  def fit_closest_path(self, source, metadatas):
+    graph = self.graph
+    graph = graph.contextual_subgraph(metadatas)
 
 
-def apply_best_rule(lemma, pos, allprules, allsrules):
-  bestrulelen = 0
-  base = "<" + lemma + ">"
-  if pos not in allprules and pos not in allsrules:
-    return lemma # Haven't seen this inflection, so bail out
+    source_words = []
+    for path in list(nx.all_simple_paths(graph, 0, -1)):
+      source_words.append(self.word_from_path(graph, list(path)))
+    print(source, len(source_words))
+    min_ldist = len(source)
+    closest_word_index = -1
 
-  if pos in allsrules:
-    applicablerules = [(x[0],x[1],y) for x,y in allsrules[pos].items() if x[0] in base]
-    if applicablerules:
-      print(applicablerules)
-      bestrule = max(applicablerules, key = lambda x: (len(x[0]), x[2], len(x[1])))         
-      print(bestrule)
-      base = base.replace(bestrule[0], bestrule[1])
-      
-  if pos in allprules:
-    applicablerules = [(x[0],x[1],y) for x,y in allprules[pos].items() if x[0] in base]
-    if applicablerules:
-      bestrule = max(applicablerules, key = lambda x: (x[2]))
-      base = base.replace(bestrule[0], bestrule[1])
-              
-  base = base.replace('<', '')
-  base = base.replace('>', '')
-  return base
+    for i, word in enumerate(source_words):
+      lp, lr, ls, rp, rr, rs = alignprs(word, source)
+      lp = lp.replace('_', '')
+      lr = lr.replace('_', '')
+      ls = ls.replace('_', '')
+      rp = rp.replace('_', '')
+      rr = rr.replace('_', '')
+      rs = rs.replace('_', '')
+      score = levenshtein(lp, rp)[-1] + levenshtein(ls, rs)[-1] + levenshtein(lr, rr)[-1]
+      score = float(score) / len(source)
+      if score < min_ldist:
+        min_ldist = score
+        closest_word_index = i
 
-def numleadingsyms(s, symbol):
-  return len(s) - len(s.lstrip(symbol))
-    
-def numtrailingsyms(s, symbol):
-  return len(s) - len(s.rstrip(symbol))
+    if closest_word_index == -1:
+      return((source, ''))
 
-def hamming(s,t):
-  return sum(1 for x,y in zip(s,t) if x != y)    
+    print(closest_word_index, len(source_words))
+    closest_word = source_words[closest_word_index]
+    fitting_path = list(nx.all_simple_paths(graph, 0, -1))[closest_word_index]
+    prediction = ''
 
-def halign(s,t):
-  """Align two strings by Hamming distance."""
-  slen = len(s)
-  tlen = len(t)
-  minscore = len(s) + len(t) + 1
-  for upad in range(0, len(t)+1):
-    upper = '_' * upad + s + (len(t) - upad) * '_'
-    lower = len(s) * '_' + t
-    score = hamming(upper, lower)
-    if score < minscore:
-      bu = upper
-      bl = lower
-      minscore = score
+    j = 0
+    for i in range(0, len(fitting_path)-1):
+      # if i == 0:
+      #   previous_edge = None
+      # else:
+      #   previous_edge = graph[fitting_path[i-1]][fitting_path[i]]
+      edge = graph[fitting_path[i]][fitting_path[i+1]]
+      if edge['input'] == edge['output'] and j < len(source):
+        prediction += source[j]
+        j += 1
+      elif edge['input'] == '':
+        prediction += edge['output']
+      elif edge['output'] == '':
+        j += 1
 
-  for lpad in range(0, len(s)+1):
-    upper = len(t) * '_' + s
-    lower = (len(s) - lpad) * '_' + t + '_' * lpad
-    score = hamming(upper, lower)
-    if score < minscore:
-      bu = upper
-      bl = lower
-      minscore = score
+    if j < len(source):
+      prediction += source[j:]
 
-  zipped = zip(bu,bl)
-  newin  = ''.join(i for i,o in zipped if i != '_' or o != '_')
-  zipped = zip(bu,bl)
-  newout = ''.join(o for i,o in zipped if i != '_' or o != '_')
-  return((newin, newout))
-
-def prefix_suffix_rules_get(lemma, form):
-  lp,lr,ls,fp,fr,fs = alignprs(lemma, form) # Get six parts, three for in three for out
-
-  # Suffix rules
-  ins  = lr + ls + ">"
-  outs = fr + fs + ">"    
-  srules = set()
-  for i in range(min(len(ins), len(outs))):
-    srules.add((ins[i:], outs[i:]))
-  srules = {(x[0].replace('_',''), x[1].replace('_','')) for x in srules}
-
-  # Prefix rules
-  prules = set()
-  if len(lp) >= 0 or len(fp) >= 0:
-    inp = "<" + lp
-    outp = "<" + fp
-    for i in range(0,len(fr)):
-      prules.add((inp + fr[:i],outp + fr[:i]))
-      prules = {(x[0].replace('_',''), x[1].replace('_','')) for x in prules}
-
-  return prules, srules
-
+    return((prediction, closest_word))
 
 def alignprs(lemma, form):
   al = levenshtein(lemma, form, substcost = 1.1) # Force preference of 0:x or x:0 by 1.1 cost
@@ -568,43 +426,49 @@ def OSTIA(T):
   exit_condition_1 = exit_condition_2 = False
 
   tou = tou_dup = OTST(T)
-#   pretty_print_graph(tou.graph)
 
-#   q = tou.first()
-#   while q < tou.last():
-#     q = tou.next(q)
-#     # print(q)
-#     p = tou.first()
-#     # print(p<q)
-#     while p < q and not exit_condition_1:
-#       tou_dup = tou
-#       # tou = tou.merge(p, q)
-#       tou = tou.merge(q, p)
-#       while not tou.subseq() and not exit_condition_2:
-#         r, a, v, s, w, t = tou.find_subseq_violation()
+  q = tou.first()
+  # while q < tou.last():
+  while False:
+    print(q, tou.last())
+    q = tou.next(q)
+    # print(q)
+    p = tou.first()
+    # print(p<q)
+    while  p < q and not exit_condition_1:
+      print("Loop1")
+      tou_dup = tou
+      # tou = tou.merge(p, q)
+      print("Pre-merge")
+      tou = tou.merge(q, p)
+      print("Post-merge")
+      while not tou.subseq() and not exit_condition_2:
+        # print("Loop2")
+        r, a, v, s, w, t = tou.find_subseq_violation()
 
-#         print(r, a, v, s, w, t)
-#         # '#' depicts end of string
-#         exit_condition_2 = (v!=w and a=='#') or (s<q and not is_prefixed_with(v, w))
-#         if not exit_condition_2:
-#           u = lcp([v, w])
-#           tou = tou.push_back(eliminate_prefix(u, v), (r, a, v, s))
-#           tou = tou.push_back(eliminate_prefix(u, w), (r, a, w, t))
-#           # tou = tou.merge(s, t)
-#           tou = tou.merge(t, s)
-#           # pretty_print_graph(tou.graph)
+        # print(r, a, v, s, w, t)
+        # '#' depicts end of string
+        exit_condition_2 = (v!=w and a=='#') or (s<q and not is_prefixed_with(v, w))
+        if not exit_condition_2:
+          u = lcp([v, w])
+          tou = tou.push_back(eliminate_prefix(u, v), (r, a, v, s))
+          tou = tou.push_back(eliminate_prefix(u, w), (r, a, w, t))
+          # tou = tou.merge(s, t)
+          tou = tou.merge(t, s)
+          # pretty_print_graph(tou.graph)
 
-#       if not tou.subseq():
-#         tou = tou_dup
-#       else:
-#         exit_condition_1 = True
+      if not tou.subseq():
+        tou = tou_dup
+      else:
+        exit_condition_1 = True
 
-#       if not exit_condition_1:
-#         p = tou.next(p)
-#     if not tou.subseq():
-#       tou = tou_dup
+      print('Exit1', exit_condition_1)
+      if not exit_condition_1:
+        p = tou.next(p)
+    print('Subseq', tou.subseq())
+    if not tou.subseq():
+      tou = tou_dup
 
-#   pretty_print_graph(tou.graph)
   return tou
 
 def fetch_input_output_pairs(language='english', quality='low'):
@@ -638,30 +502,27 @@ def fetch_testing_data(language='english'):
 def check_all_testing_data(model, lang, quality):
   c = n = 0
   l = {}
-  # T = fetch_testing_data(language=lang)
-  # for (source, metadatas, expected_dest) in T:
-  #   try:
-  prediction = model.guess_output_for(lang, quality)
-      # if predicted_dest == expected_dest:
-      #   print("{} + {} was expected and received as {}".format(source, metadatas, predicted_dest))
-      #   c += 1
-      # else:
-      #   dist = mod_levenshtein(expected_dest, predicted_dest)
-      #   if dist in l:
-      #     l[dist] += 1
-      #   else:
-      #     l[dist] = 1
-      #   print("{} + {} was expected to be {}, but received {} instead".format(source, metadatas, expected_dest, predicted_dest))
-      # n += 1
-    # except IndexError:
-    #   print("Some error with the source word {}".format(source))
-  # print("\n\nExact word-match accuracy: {}". format(100.00*float(c)/float(n)))
+  T = fetch_testing_data(language=lang)
+  for (source, metadatas, expected_dest) in T:
+    predicted_dest, closest_word = model.fit_closest_path(source, metadatas)
+    if predicted_dest == expected_dest:
+      print("{} + {}: expected and received {}".format(source, metadatas, predicted_dest))
+      c += 1
+    else:
+      dist = mod_levenshtein(expected_dest, predicted_dest)
+      if dist in l:
+        l[dist] += 1
+      else:
+        l[dist] = 1
+      print("{} + {}: expected {}, but received {}".format(source, metadatas, expected_dest, predicted_dest))
+    print("Prediction given by most fitting path of word: {}".format(closest_word))
+    n += 1
+  print("\n\nExact word-match accuracy: {}". format(100.00*float(c)/float(n)))
   # print("\n Levenshtein distribution:", l)
 
 lang = 'english'
-quality = 'medium'
+quality = 'low'
 T = fetch_input_output_pairs(language=lang, quality=quality)
-T = OSTIA(T[0:2])
+T = OSTIA(T)
 
 check_all_testing_data(T, lang, quality)
-# print(T,('match', ['V', 'PST']))
